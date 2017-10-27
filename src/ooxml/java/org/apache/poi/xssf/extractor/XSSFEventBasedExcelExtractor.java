@@ -20,6 +20,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -43,6 +44,7 @@ import org.apache.poi.xssf.model.CommentsTable;
 import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFComment;
 import org.apache.poi.xssf.usermodel.XSSFShape;
+import org.apache.poi.xssf.usermodel.XSSFShapeGroup;
 import org.apache.poi.xssf.usermodel.XSSFSimpleShape;
 import org.apache.xmlbeans.XmlException;
 import org.xml.sax.ContentHandler;
@@ -310,14 +312,24 @@ public class XSSFEventBasedExcelExtractor extends POIXMLTextExtractor
             return;
         }
         for (XSSFShape shape : shapes){
-            if (shape instanceof XSSFSimpleShape){
-                String sText = ((XSSFSimpleShape)shape).getText();
-                if (sText != null && sText.length() > 0){
-                    text.append(sText).append('\n');
-                }
+            handleShape(text, shape);
+        }
+    }
+
+    private void handleShape(StringBuffer text, XSSFShape shape) {
+        if (shape instanceof XSSFSimpleShape){
+            String sText = ((XSSFSimpleShape)shape).getText();
+            if (sText != null && sText.length() > 0){
+                text.append(sText).append('\n');
+            }
+        } else if(shape instanceof XSSFShapeGroup) {
+            Iterator<XSSFShape> iter = ((XSSFShapeGroup) shape).iterator();
+            while(iter.hasNext()) {
+                handleShape(text, iter.next());
             }
         }
     }
+
     @Override
 	public void close() throws IOException {
 		if (container != null) {

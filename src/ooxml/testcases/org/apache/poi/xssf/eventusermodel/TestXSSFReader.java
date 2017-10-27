@@ -35,6 +35,7 @@ import org.apache.poi.xssf.model.CommentsTable;
 import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFShape;
+import org.apache.poi.xssf.usermodel.XSSFShapeGroup;
 import org.apache.poi.xssf.usermodel.XSSFSimpleShape;
 
 import junit.framework.TestCase;
@@ -198,14 +199,23 @@ public final class TestXSSFReader extends TestCase {
             List<XSSFShape> shapes = it.getShapes();
             if (shapes != null) {
                 for (XSSFShape shape : shapes) {
-                    if (shape instanceof XSSFSimpleShape) {
-                        String t = ((XSSFSimpleShape) shape).getText();
-                        sb.append(t).append('\n');
-                    }
+                    handleShape(sb, shape);
                 }
             }
         }
         return sb.toString();
+    }
+
+    private void handleShape(StringBuilder sb, XSSFShape shape) {
+        if (shape instanceof XSSFSimpleShape) {
+            String t = ((XSSFSimpleShape) shape).getText();
+            sb.append(t).append('\n');
+        } else if(shape instanceof XSSFShapeGroup) {
+            Iterator<XSSFShape> iter = ((XSSFShapeGroup) shape).iterator();
+            while(iter.hasNext()) {
+                handleShape(sb, iter.next());
+            }
+        }
     }
 
     public void testBug57914() throws Exception {
