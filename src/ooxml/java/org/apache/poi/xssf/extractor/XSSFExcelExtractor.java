@@ -36,6 +36,7 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFRelation;
 import org.apache.poi.xssf.usermodel.XSSFShape;
+import org.apache.poi.xssf.usermodel.XSSFShapeGroup;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFSimpleShape;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -202,13 +203,7 @@ public class XSSFExcelExtractor extends POIXMLTextExtractor
                 XSSFDrawing drawing = sheet.getDrawingPatriarch();
                 if (drawing != null) {
                     for (XSSFShape shape : drawing.getShapes()){
-                        if (shape instanceof XSSFSimpleShape){
-                            String boxText = ((XSSFSimpleShape)shape).getText();
-                            if (boxText.length() > 0){
-                                text.append(boxText);
-                                text.append('\n');
-                            }
-                        }
+                        handleShape(text, shape);
                     }
                 }
             }
@@ -227,6 +222,21 @@ public class XSSFExcelExtractor extends POIXMLTextExtractor
         }
 
         return text.toString();
+    }
+
+    private void handleShape(StringBuffer text, XSSFShape shape) {
+        if (shape instanceof XSSFSimpleShape){
+            String boxText = ((XSSFSimpleShape)shape).getText();
+            if (boxText.length() > 0){
+                text.append(boxText);
+                text.append('\n');
+            }
+        } else if(shape instanceof XSSFShapeGroup) {
+            Iterator<XSSFShape> iter = ((XSSFShapeGroup) shape).iterator();
+            while(iter.hasNext()) {
+                handleShape(text, iter.next());
+            }
+        }
     }
 
     private void handleStringCell(StringBuffer text, Cell cell) {
