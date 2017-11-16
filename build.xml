@@ -40,8 +40,8 @@ under the License.
 
     <description>The Apache POI project Ant build.</description>
 
-    <property name="version.id" value="3.17"/>
-    <property name="release.rc" value="patch1"/>
+    <property name="version.id" value="3.17-patch1"/>
+    <property name="release.rc" value="RC"/>
 
     <property environment="env"/>
     <!-- the repository to download jars from -->
